@@ -1,6 +1,8 @@
+.env
 __pycache__/
 *.pyc
-.env
+sample.pdf
+logs/*.log
 
 uploads/*
 !uploads/.gitkeep
