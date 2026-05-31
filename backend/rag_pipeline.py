@@ -15,11 +15,11 @@ class RAGPipeline:
             temperature=0.2
         )
 
-    def ask(self, query: str):
+    def ask(self, query: str,k: int =4):
 
         docs = self.vector_store.similarity_search(
             query,
-            k=4
+            k=k
         )
 
         context = "\n\n".join(
