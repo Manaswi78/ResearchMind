@@ -6,6 +6,9 @@ from backend.rag_pipeline import RAGPipeline
 
 st.title("💬 Chat With Paper")
 
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
 try:
     embeddings = EmbeddingModel.get_embeddings()
 
@@ -15,32 +18,43 @@ try:
 
     rag = RAGPipeline(vector_store)
 
-except Exception as e:
+except Exception:
     st.error(
         "No indexed paper found. Please upload a PDF first."
     )
     st.stop()
 
-query = st.text_input(
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
+
+query = st.chat_input(
     "Ask a question about your paper"
 )
 
 if query:
 
-    with st.spinner("Thinking..."):
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "content": query
+        }
+    )
 
-        result = rag.ask(query)
+    with st.chat_message("user"):
+        st.write(query)
 
-    st.subheader("Answer")
+    with st.chat_message("assistant"):
 
-    st.write(result["answer"])
+        with st.spinner("Thinking..."):
 
-    with st.expander("Sources Used"):
+            result = rag.ask(query)
 
-        for i, doc in enumerate(
-            result["sources"],
-            start=1
-        ):
-            st.write(f"Source {i}")
-            st.write(doc.page_content[:500])
-            st.divider()
+            st.write(result["answer"])
+
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": result["answer"]
+        }
+    )
